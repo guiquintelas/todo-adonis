@@ -10,12 +10,17 @@
 | with dummy data.
 |
 */
+/** @typedef {typeof import('chance') Chance} */
 
 /** @type {import('@adonisjs/lucid/src/Factory')} */
-// const Factory = use('Factory')
+const Factory = use('Factory')
 
-// Factory.blueprint('App/Models/User', (faker) => {
-//   return {
-//     username: faker.username()
-//   }
-// })
+Factory.blueprint('App/Models/User',
+  /** @param {Chance.Chance} faker */
+  faker => {
+    return {
+      username: faker.username(),
+      email: faker.email(),
+      password: faker.string({ lenght: 5 })
+    }
+  })

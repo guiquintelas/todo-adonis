@@ -16,12 +16,8 @@
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
 const Route = use('Route')
 
-Route.get('/', () => { 
-    return {
-            conten: "Hello Fellas"
-        }
-    }
-);
+Route.get('/users', 'UserController.index').middleware('auth')
+Route.post('/users', 'UserController.create')
 
-Route.get('/users', "UserController.index");
-Route.post('/users', "UserController.create");
+Route.post('/auth/login', 'AuthController.login')
+Route.get('/auth', 'AuthController.detail').middleware('auth')

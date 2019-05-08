@@ -28,15 +28,23 @@ class ExceptionHandler extends BaseExceptionHandler {
     const errorJson = {
       error: {
         msg: error.message,
-        meta: '',
-        stack: error.stack.split('\n')
+        meta: ''
       }
     }
 
     if (error.meta) {
       errorJson.error.meta = error.meta
+      delete errorJson.error.meta.validation
     } else {
       delete errorJson.error.meta
+    }
+
+    if (error.status === 500) {
+      errorJson.error.stack = error.stack.split('\n')
+    }
+
+    if (error.code === 'E_INVALID_JWT_TOKEN') {
+      errorJson.error.msg = 'Você precisa estar logado!'
     }
 
     response

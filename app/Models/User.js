@@ -1,18 +1,42 @@
 'use strict'
 
-/** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
-const Model = use('Model')
+/** @type {typeof import('../Core/Model')} */
+const Model = require('../Core/Model')
 
 /** @type {import('@adonisjs/framework/src/Hash')} */
 const Hash = use('Hash')
 
+const BadRequestException = use('App/Exceptions/BadRequestException')
+
 class User extends Model {
+  async login (auth, password) {
+    try {
+      return auth.attempt(this.email, password)
+    } catch (e) {
+      throw new BadRequestException('Senha incorreta!')
+    }
+  }
+
+  static async validateAndCreate (fields) {
+    await this.validate(fields)
+
+    const user = new User()
+    user.merge(fields)
+    await user.save()
+
+    return user
+  }
+
   static validation () {
     return {
       username: 'required|unique:users,username',
       email: 'required|email|unique:users,email',
       password: 'required'
     }
+  }
+
+  static get hidden () {
+    return ['password']
   }
 
   static boot () {
