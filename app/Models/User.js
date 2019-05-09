@@ -17,17 +17,18 @@ class User extends Model {
     }
   }
 
-  static async validateAndCreate (fields) {
-    await this.validate(fields)
-
-    const user = new User()
-    user.merge(fields)
-    await user.save()
-
-    return user
+  static get hidden () {
+    return ['password']
   }
 
-  static validation () {
+  static get fillable () {
+    return [
+      'username',
+      'email'
+    ]
+  }
+
+  static get validation () {
     return {
       username: 'required|unique:users,username',
       email: 'required|email|unique:users,email',
@@ -35,8 +36,22 @@ class User extends Model {
     }
   }
 
-  static get hidden () {
-    return ['password']
+  static async validateAndCreate (fields) {
+    const user = new User()
+    await user.validate(fields)
+    user.setFillables(fields)
+    await user.save()
+
+    return user
+  }
+
+  async validateAndUpdate (fields) {
+    await this.validateWithoutRequired(fields)
+
+    this.setFillables(fields)
+    await this.save()
+
+    return this
   }
 
   static boot () {
