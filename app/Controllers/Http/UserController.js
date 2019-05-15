@@ -40,6 +40,16 @@ class UserController extends Controller {
    * @param {object} ctx
    * @param {Request} ctx.request
    * @param {Response} ctx.response
+   * @param {Auth} ctx.auth
+   */
+  async self ({ request, response, auth }) {
+    return this.success(response, auth.user)
+  }
+
+  /**
+   * @param {object} ctx
+   * @param {Request} ctx.request
+   * @param {Response} ctx.response
    */
   async index ({ request, response }) {
     const users = await User.index(request).paginate()

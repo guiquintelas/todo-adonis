@@ -18,7 +18,9 @@ const Route = use('Route')
 
 Route.get('/users', 'UserController.index').middleware('auth')
 Route.post('/users', 'UserController.create')
-Route.put('/users', 'UserController.selfUpdate').middleware('auth')
+
+Route.put('/users/self', 'UserController.selfUpdate').middleware('auth')
+Route.get('/users/self', 'UserController.self').middleware('auth')
 
 Route.post('/auth/login', 'AuthController.login')
-Route.get('/auth', 'AuthController.detail').middleware('auth')
+Route.post('/auth/logout', 'AuthController.logout').middleware('auth')

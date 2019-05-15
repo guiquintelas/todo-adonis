@@ -9,12 +9,11 @@ const Hash = use('Hash')
 const BadRequestException = use('App/Exceptions/BadRequestException')
 
 class User extends Model {
-  async login (auth, password) {
-    try {
-      return auth.attempt(this.email, password)
-    } catch (e) {
-      throw new BadRequestException('Senha incorreta!')
-    }
+  static index (request) {
+    return this.apiResource(request, [
+      'username',
+      'email'
+    ])
   }
 
   static get hidden () {
@@ -26,6 +25,20 @@ class User extends Model {
       'username',
       'email'
     ]
+  }
+
+  tokens () {
+    return this.hasMany('App/Models/Token')
+  }
+
+  static boot () {
+    super.boot()
+
+    this.addHook('beforeSave', async userInstance => {
+      if (userInstance.dirty.password) {
+        userInstance.password = await Hash.make(userInstance.password)
+      }
+    })
   }
 
   static get validation () {
@@ -52,34 +65,6 @@ class User extends Model {
     await this.save()
 
     return this
-  }
-
-  static boot () {
-    super.boot()
-
-    /**
-     * A hook to hash the user password before saving
-     * it to the database.
-     */
-    this.addHook('beforeSave', async userInstance => {
-      if (userInstance.dirty.password) {
-        userInstance.password = await Hash.make(userInstance.password)
-      }
-    })
-  }
-
-  /**
-   * A relationship on tokens is required for auth to
-   * work. Since features like `refreshTokens` or
-   * `rememberToken` will be saved inside the
-   * tokens table.
-   *
-   * @method tokens
-   *
-   * @return {Object}
-   */
-  tokens () {
-    return this.hasMany('App/Models/Token')
   }
 }
 

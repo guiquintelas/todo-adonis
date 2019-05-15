@@ -43,7 +43,7 @@ class ExceptionHandler extends BaseExceptionHandler {
       errorJson.error.stack = error.stack.split('\n')
     }
 
-    if (error.code === 'E_INVALID_JWT_TOKEN') {
+    if (error.code === 'E_INVALID_JWT_TOKEN' || error.code === 'E_INVALID_API_TOKEN') {
       errorJson.error.msg = 'Você precisa estar logado!'
     }
 

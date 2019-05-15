@@ -6,10 +6,14 @@
 /** @type {import('../../Core/Validator')} */
 const { validate } = use('App/Core/Validator')
 
+/** @type {typeof import('../../Models/Token')} */
+const Token = use('App/Models/Token')
+
 /** @type {typeof import('../../Models/User')} */
 const User = use('App/Models/User')
 
 const Controller = use('App/Core/Controller')
+const BadRequestException = use('App/Exceptions/BadRequestException')
 
 class AuthController extends Controller {
   /**
@@ -31,17 +35,40 @@ class AuthController extends Controller {
       .orWhere('username', login)
       .first()
 
-    const token = await user.login(auth, password)
+    if (!user) {
+      throw new BadRequestException('Login inválido!')
+    }
 
-    this.success(response, { token })
+    let lastToken = await user.tokens().fetch()
+
+    const lastTokenIds = lastToken.rows.map(el => el.id)
+
+    let token = ''
+
+    try {
+      token = await auth.attempt(user.email, password)
+    } catch (e) {
+      throw new BadRequestException('Senha incorreta!')
+    }
+
+    // removing old tokens
+    // making possible only one active token at all times
+    await Token
+      .query()
+      .whereIn('id', lastTokenIds)
+      .delete()
+
+    return this.success(response, { token })
   }
 
   /**
    * @param {object} ctx
    * @param {Response} ctx.response
    */
-  async detail ({ response, auth }) {
-    return this.success(response, auth.user)
+  async logout ({ response, auth }) {
+    await auth.user.tokens().delete()
+
+    return this.success(response)
   }
 }
 
